@@ -1,0 +1,62 @@
+Sample Code
+
+<?php
+$content = "
+[goat_pref tab('\t')];[goat_pref tab-count(0)];
+[greeting hello('en')];, User!
+[goat_pref tab-count(2)];
+Today is: [datetime time('r','now')];
+
+[goat_pref tab-count(0)];
+rand = [math rand(1,10)];
+a    = [var a tab=2];
+
+";
+
+
+
+function hello_world($lang = "en"){
+	switch($lang){
+		case "gr":
+			return "Hallo";
+		case "sp":
+			return "Hola";
+		case "fr":
+			return "Bonjour";
+		case "it":
+			return "Ciao";
+		default:
+			return "Hello";
+	}
+}
+
+function get_time($format = "", $time = "now"){
+	$time = (is_numeric($time) ? $time : strtotime($time));
+	return date($format, $time);
+}
+
+echo "Start";
+
+
+
+$goat = new goat();
+
+$goat->register_group("greeting");
+$goat->register_callback("greeting","hello", "hello_world");
+$goat->register_group("datetime");
+$goat->register_callback("datetime","time", "get_time");
+$goat->register_group("math");
+$goat->register_callback("math","rand", "rand");
+
+$goat->register_variable("a","hello my\nbaby");
+
+
+echo $goat->parse($content);
+
+while($goat->error_count() > 0){
+	echo $goat->pop_error();
+}
+
+
+echo "End.";
+?>

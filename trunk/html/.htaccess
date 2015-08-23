@@ -1,0 +1,55 @@
+#
+# @author Justin Johnson <justin@booleangate.org>
+# @version 2.0.0 20100202 <johnsonj>
+#
+
+# PHP version 5 triggers
+	AddHandler php5-script .php                     # Media Temple
+	# AddHandler php5-cgi .php                      # Dreamhost
+	# AddHandler x-httpd-php5 .php                  # GoDaddy
+	# AddHandler application/x-httpd-php5 .php      # Hostdime
+	# AddHandler application/x-httpd-php52 .php     # SiteGround
+
+# Avoids problems with mod_rewrite
+	Options +FollowSymLinks
+
+# For GOBE 
+	<IfModule mod_rewrite.c>
+		RewriteEngine on
+		
+		# Keep users out of the code directories
+			RewriteCond  %{REQUEST_URI}       (^/config/*)                         [NC,OR]
+			RewriteCond  %{REQUEST_URI}       (^/gobe/*)                           [NC]
+			RewriteCond  %{REQUEST_URI}       (^/modules/*)                        [NC]
+			RewriteRule  ^.*$                 /                                    [R]
+		
+		# Don't rewrite for these locations
+			RewriteCond  %{REQUEST_URI}       !(^/admin/rpc/*)                     [NC]
+			RewriteCond  %{REQUEST_URI}       !(^/bin/*)                           [NC]
+			RewriteCond  %{REQUEST_URI}       !(^/blog/*)                          [NC]
+			RewriteCond  %{REQUEST_URI}       !(^/forum/*)                         [NC]
+			RewriteCond  %{REQUEST_URI}       !(^/messageboard/*)                  [NC]
+			RewriteCond  %{REQUEST_URI}       !(^/resources/*)                     [NC]
+			RewriteCond  %{REQUEST_URI}       !(^/rpc/*)                           [NC]
+			RewriteCond  %{REQUEST_URI}       !(^/tmp/*)                           [NC]
+			RewriteCond  %{REQUEST_URI}       !(^/var/*)                           [NC]
+		
+		# Rewrite any html or directory access
+			RewriteCond  %{REQUEST_FILENAME}  .html$                               [NC,OR]
+			RewriteCond  %{REQUEST_FILENAME}  -d
+			RewriteRule  ^(.*)$               /gobe/boot.php?--gobe-path=/$1           [L,QSA]
+			
+		# 404 rewrites
+			RewriteCond %{SCRIPT_FILENAME} !-f
+			RewriteCond %{SCRIPT_FILENAME} !-d
+			RewriteRule ^(.*)$ /gobe/boot.php?--gobe-path=$1&--gobe-status=404          [L,QSA]
+	</IfModule>
+	
+	# Custom error docs
+		ErrorDocument 500 /gobe/boot.php?--gobe-status=500
+#		ErrorDocument 404 /gobe/boot.php?--gobe-status=404
+		ErrorDocument 403 /gobe/boot.php?--gobe-status=403
+
+
+# PHP config
+php_value allow_url_fopen on
